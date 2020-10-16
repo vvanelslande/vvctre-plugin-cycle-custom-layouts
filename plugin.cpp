@@ -68,8 +68,8 @@ static vvctre_set_os_window_position_t vvctre_set_os_window_position;
 static void* plugin_manager;
 static void* button = nullptr;
 static bool button_pressed = false;
-static u64 current_custom_layout = 0;
-static bool change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting = true;
+static u64 current_custom_layout = -1;
+static bool load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time = true;
 
 struct CustomLayout {
     struct Screen {
@@ -139,8 +139,8 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
             button =
                 vvctre_button_device_new(plugin_manager, json["button"].get<std::string>().c_str());
 
-            if (json.count("change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting")) {
-                change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting = json["change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting"].get<bool>();
+            if (json.count("load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time")) {
+                load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time = json["load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time"].get<bool>();
             }
 
             for (const nlohmann::json& json_layout : json["layouts"]) {
@@ -177,7 +177,7 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
         }
     }
 
-    if (!custom_layouts.empty()) {
+    if (load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time && !custom_layouts.empty()) {
         vvctre_settings_set_use_custom_layout(true);
         vvctre_settings_set_custom_layout_top_left(custom_layouts[0].top_screen.left);
         vvctre_settings_set_custom_layout_top_top(custom_layouts[0].top_screen.top);
@@ -196,11 +196,12 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
                                           custom_layouts[0].move_window.x,
                                           custom_layouts[0].move_window.y);
         }
+        current_custom_layout = 0;
     }
 }
 
 VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
-    if (!custom_layouts.empty()) {
+    if (load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time && !custom_layouts.empty()) {
         if (custom_layouts[0].resize_window.enabled) {
             vvctre_set_os_window_size(plugin_manager, custom_layouts[0].resize_window.width,
                                       custom_layouts[0].resize_window.height);
