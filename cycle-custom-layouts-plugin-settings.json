@@ -13,6 +13,11 @@
         "top": 0,
         "right": 0,
         "bottom": 0
+      },
+      "resize_window": {
+        "enabled": true,
+        "width": 800,
+        "height": 480
       }
     },
     {
@@ -27,6 +32,11 @@
         "top": 0,
         "right": 0,
         "bottom": 0
+      },
+      "resize_window": {
+        "enabled": true,
+        "width": 1366,
+        "height": 768
       }
     },
     {
@@ -41,6 +51,30 @@
         "top": 0,
         "right": 0,
         "bottom": 0
+      },
+      "resize_window": {
+        "enabled": true,
+        "width": 1307,
+        "height": 784
+      }
+    },
+    {
+      "top_screen": {
+        "left": 0,
+        "top": 0,
+        "right": 400,
+        "bottom": 240
+      },
+      "bottom_screen": {
+        "left": 40,
+        "top": 240,
+        "right": 360,
+        "bottom": 480
+      },
+      "resize_window": {
+        "enabled": false,
+        "width": 0,
+        "height": 0
       }
     }
   ]

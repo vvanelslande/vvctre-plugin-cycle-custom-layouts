@@ -28,6 +28,7 @@ static const char* required_function_names[] = {
     "vvctre_button_device_get_state",
     "vvctre_settings_apply",
     "vvctre_settings_set_use_custom_layout",
+    "vvctre_set_os_window_size",
 };
 
 typedef void (*vvctre_settings_set_custom_layout_top_left_t)(u16 value);
@@ -42,6 +43,7 @@ typedef void* (*vvctre_button_device_new_t)(void* plugin_manager, const char* pa
 typedef bool (*vvctre_button_device_get_state_t)(void* device);
 typedef void (*vvctre_settings_apply_t)();
 typedef void (*vvctre_settings_set_use_custom_layout_t)(bool value);
+typedef void (*vvctre_set_os_window_size_t)(void* plugin_manager, int width, int height);
 
 static vvctre_settings_set_custom_layout_top_left_t vvctre_settings_set_custom_layout_top_left;
 static vvctre_settings_set_custom_layout_top_top_t vvctre_settings_set_custom_layout_top_top;
@@ -58,6 +60,7 @@ static vvctre_button_device_new_t vvctre_button_device_new;
 static vvctre_button_device_get_state_t vvctre_button_device_get_state;
 static vvctre_settings_apply_t vvctre_settings_apply;
 static vvctre_settings_set_use_custom_layout_t vvctre_settings_set_use_custom_layout;
+static vvctre_set_os_window_size_t vvctre_set_os_window_size;
 
 static void* plugin_manager;
 static void* button = nullptr;
@@ -71,11 +74,16 @@ struct CustomLayout {
         u16 right;
         u16 bottom;
     } top_screen, bottom_screen;
+    struct {
+        bool enabled;
+        int width;
+        int height;
+    } resize_window;
 };
 std::vector<CustomLayout> custom_layouts;
 
 VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
-    return 12;
+    return 13;
 }
 
 VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
@@ -106,6 +114,7 @@ VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager_,
     vvctre_settings_apply = (vvctre_settings_apply_t)required_functions[10];
     vvctre_settings_set_use_custom_layout =
         (vvctre_settings_set_use_custom_layout_t)required_functions[11];
+    vvctre_set_os_window_size = (vvctre_set_os_window_size_t)required_functions[12];
 }
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
@@ -134,6 +143,11 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
                         layout["bottom_screen"]["right"].get<u16>(),
                         layout["bottom_screen"]["bottom"].get<u16>(),
                     },
+                    {
+                        layout["resize_window"]["enabled"].get<bool>(),
+                        layout["resize_window"]["width"].get<int>(),
+                        layout["resize_window"]["height"].get<int>(),
+                    },
                 });
             }
         } catch (nlohmann::json::exception&) {
@@ -150,6 +164,10 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
         vvctre_settings_set_custom_layout_bottom_top(custom_layouts[0].bottom_screen.top);
         vvctre_settings_set_custom_layout_bottom_right(custom_layouts[0].bottom_screen.right);
         vvctre_settings_set_custom_layout_bottom_bottom(custom_layouts[0].bottom_screen.bottom);
+        if (custom_layouts[0].resize_window.enabled) {
+            vvctre_set_os_window_size(plugin_manager, custom_layouts[0].resize_window.width,
+                                      custom_layouts[0].resize_window.height);
+        }
     }
 }
 
@@ -182,6 +200,11 @@ VVCTRE_PLUGIN_EXPORT void BeforeDrawingFPS() {
         vvctre_settings_set_custom_layout_bottom_bottom(
             custom_layouts[current_custom_layout].bottom_screen.bottom);
         vvctre_settings_apply();
+        if (custom_layouts[current_custom_layout].resize_window.enabled) {
+            vvctre_set_os_window_size(plugin_manager,
+                                      custom_layouts[current_custom_layout].resize_window.width,
+                                      custom_layouts[current_custom_layout].resize_window.height);
+        }
         button_pressed = false;
     }
 }
