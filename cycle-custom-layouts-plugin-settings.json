@@ -1,6 +1,5 @@
 {
   "button": "engine:keyboard,code:6",
-  "resize_window_to_layout_size": true,
   "layouts": [
     {
       "top_screen": {
