@@ -1,6 +1,6 @@
 {
   "button": "engine:keyboard,code:6",
-  "change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting": true,
+  "load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time": true,
   "layouts": [
     {
       "top_screen": {
