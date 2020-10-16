@@ -69,6 +69,7 @@ static void* plugin_manager;
 static void* button = nullptr;
 static bool button_pressed = false;
 static u64 current_custom_layout = 0;
+static bool change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting = true;
 
 struct CustomLayout {
     struct Screen {
@@ -137,6 +138,10 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 
             button =
                 vvctre_button_device_new(plugin_manager, json["button"].get<std::string>().c_str());
+
+            if (json.count("change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting")) {
+                change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting = json["change_layout_and_window_size_and_window_position_when_vvctre_is_starting_and_emulation_is_starting"].get<bool>();
+            }
 
             for (const nlohmann::json& json_layout : json["layouts"]) {
                 CustomLayout custom_layout{};
