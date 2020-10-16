@@ -71,21 +71,21 @@ static bool button_pressed = false;
 static u64 current_custom_layout = 0;
 
 struct CustomLayout {
-    struct {
-        u16 left;
-        u16 top;
-        u16 right;
-        u16 bottom;
+    struct Screen {
+        u16 left = 0;
+        u16 top = 0;
+        u16 right = 0;
+        u16 bottom = 0;
     } top_screen, bottom_screen;
-    struct {
-        bool enabled;
-        int width;
-        int height;
+    struct ResizeWindow {
+        bool enabled = false;
+        int width = 0;
+        int height = 0;
     } resize_window;
-    struct {
-        bool enabled;
-        int x;
-        int y;
+    struct MoveWindow {
+        bool enabled = false;
+        int x = 0;
+        int y = 0;
     } move_window;
 };
 std::vector<CustomLayout> custom_layouts;
@@ -138,31 +138,35 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
             button =
                 vvctre_button_device_new(plugin_manager, json["button"].get<std::string>().c_str());
 
-            for (const nlohmann::json& layout : json["layouts"]) {
-                custom_layouts.push_back(CustomLayout{
-                    {
-                        layout["top_screen"]["left"].get<u16>(),
-                        layout["top_screen"]["top"].get<u16>(),
-                        layout["top_screen"]["right"].get<u16>(),
-                        layout["top_screen"]["bottom"].get<u16>(),
-                    },
-                    {
-                        layout["bottom_screen"]["left"].get<u16>(),
-                        layout["bottom_screen"]["top"].get<u16>(),
-                        layout["bottom_screen"]["right"].get<u16>(),
-                        layout["bottom_screen"]["bottom"].get<u16>(),
-                    },
-                    {
-                        layout["resize_window"]["enabled"].get<bool>(),
-                        layout["resize_window"]["width"].get<int>(),
-                        layout["resize_window"]["height"].get<int>(),
-                    },
-                    {
-                        layout["move_window"]["enabled"].get<bool>(),
-                        layout["move_window"]["x"].get<int>(),
-                        layout["move_window"]["y"].get<int>(),
-                    },
-                });
+            for (const nlohmann::json& json_layout : json["layouts"]) {
+                CustomLayout custom_layout{};
+                custom_layout.top_screen = CustomLayout::Screen{
+                    json_layout["top_screen"]["left"].get<u16>(),
+                    json_layout["top_screen"]["top"].get<u16>(),
+                    json_layout["top_screen"]["right"].get<u16>(),
+                    json_layout["top_screen"]["bottom"].get<u16>(),
+                };
+                custom_layout.bottom_screen = CustomLayout::Screen{
+                    json_layout["bottom_screen"]["left"].get<u16>(),
+                    json_layout["bottom_screen"]["top"].get<u16>(),
+                    json_layout["bottom_screen"]["right"].get<u16>(),
+                    json_layout["bottom_screen"]["bottom"].get<u16>(),
+                };
+                if (json_layout.count("resize_window")) {
+                    custom_layout.resize_window = CustomLayout::ResizeWindow{
+                        json_layout["resize_window"]["enabled"].get<bool>(),
+                        json_layout["resize_window"]["width"].get<int>(),
+                        json_layout["resize_window"]["height"].get<int>(),
+                    };
+                }
+                if (json_layout.count("move_window")) {
+                    custom_layout.move_window = CustomLayout::ResizeWindow{
+                        json_layout["move_window"]["enabled"].get<bool>(),
+                        json_layout["move_window"]["x"].get<int>(),
+                        json_layout["move_window"]["y"].get<int>(),
+                    };
+                }
+                custom_layouts.push_back(custom_layout);
             }
         } catch (nlohmann::json::exception&) {
         }
