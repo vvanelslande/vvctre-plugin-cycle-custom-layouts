@@ -160,7 +160,7 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
                     };
                 }
                 if (json_layout.count("move_window")) {
-                    custom_layout.move_window = CustomLayout::ResizeWindow{
+                    custom_layout.move_window = CustomLayout::MoveWindow{
                         json_layout["move_window"]["enabled"].get<bool>(),
                         json_layout["move_window"]["x"].get<int>(),
                         json_layout["move_window"]["y"].get<int>(),
@@ -182,6 +182,20 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
         vvctre_settings_set_custom_layout_bottom_top(custom_layouts[0].bottom_screen.top);
         vvctre_settings_set_custom_layout_bottom_right(custom_layouts[0].bottom_screen.right);
         vvctre_settings_set_custom_layout_bottom_bottom(custom_layouts[0].bottom_screen.bottom);
+        if (custom_layouts[0].resize_window.enabled) {
+            vvctre_set_os_window_size(plugin_manager, custom_layouts[0].resize_window.width,
+                                      custom_layouts[0].resize_window.height);
+        }
+        if (custom_layouts[0].move_window.enabled) {
+            vvctre_set_os_window_position(plugin_manager,
+                                          custom_layouts[0].move_window.x,
+                                          custom_layouts[0].move_window.y);
+        }
+    }
+}
+
+VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
+    if (!custom_layouts.empty()) {
         if (custom_layouts[0].resize_window.enabled) {
             vvctre_set_os_window_size(plugin_manager, custom_layouts[0].resize_window.width,
                                       custom_layouts[0].resize_window.height);
