@@ -28,9 +28,6 @@ static const char* required_function_names[] = {
     "vvctre_button_device_get_state",
     "vvctre_settings_apply",
     "vvctre_settings_set_use_custom_layout",
-    "vvctre_settings_get_layout_width",
-    "vvctre_settings_get_layout_height",
-    "vvctre_set_os_window_size",
 };
 
 typedef void (*vvctre_settings_set_custom_layout_top_left_t)(u16 value);
@@ -45,9 +42,6 @@ typedef void* (*vvctre_button_device_new_t)(void* plugin_manager, const char* pa
 typedef bool (*vvctre_button_device_get_state_t)(void* device);
 typedef void (*vvctre_settings_apply_t)();
 typedef void (*vvctre_settings_set_use_custom_layout_t)(bool value);
-typedef void (*vvctre_set_os_window_size_t)(void* plugin_manager, int width, int height);
-typedef u32 (*vvctre_settings_get_layout_width_t)();
-typedef u32 (*vvctre_settings_get_layout_height_t)();
 
 static vvctre_settings_set_custom_layout_top_left_t vvctre_settings_set_custom_layout_top_left;
 static vvctre_settings_set_custom_layout_top_top_t vvctre_settings_set_custom_layout_top_top;
@@ -64,15 +58,11 @@ static vvctre_button_device_new_t vvctre_button_device_new;
 static vvctre_button_device_get_state_t vvctre_button_device_get_state;
 static vvctre_settings_apply_t vvctre_settings_apply;
 static vvctre_settings_set_use_custom_layout_t vvctre_settings_set_use_custom_layout;
-static vvctre_set_os_window_size_t vvctre_set_os_window_size;
-static vvctre_settings_get_layout_width_t vvctre_settings_get_layout_width;
-static vvctre_settings_get_layout_height_t vvctre_settings_get_layout_height;
 
 static void* plugin_manager;
 static void* button = nullptr;
 static bool button_pressed = false;
 static u64 current_custom_layout = 0;
-static bool resize_window_to_layout_size = false;
 
 struct CustomLayout {
     struct {
@@ -85,7 +75,7 @@ struct CustomLayout {
 std::vector<CustomLayout> custom_layouts;
 
 VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
-    return 15;
+    return 12;
 }
 
 VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
@@ -116,9 +106,6 @@ VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager_,
     vvctre_settings_apply = (vvctre_settings_apply_t)required_functions[10];
     vvctre_settings_set_use_custom_layout =
         (vvctre_settings_set_use_custom_layout_t)required_functions[11];
-    vvctre_settings_get_layout_width = (vvctre_settings_get_layout_width_t)required_functions[12];
-    vvctre_settings_get_layout_height = (vvctre_settings_get_layout_height_t)required_functions[13];
-    vvctre_set_os_window_size = (vvctre_set_os_window_size_t)required_functions[14];
 }
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
@@ -132,8 +119,6 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 
             button =
                 vvctre_button_device_new(plugin_manager, json["button"].get<std::string>().c_str());
-
-            resize_window_to_layout_size = json["resize_window_to_layout_size"].get<bool>();
 
             for (const nlohmann::json& layout : json["layouts"]) {
                 custom_layouts.push_back(CustomLayout{
@@ -197,18 +182,6 @@ VVCTRE_PLUGIN_EXPORT void BeforeDrawingFPS() {
         vvctre_settings_set_custom_layout_bottom_bottom(
             custom_layouts[current_custom_layout].bottom_screen.bottom);
         vvctre_settings_apply();
-        if (resize_window_to_layout_size) {
-            vvctre_set_os_window_size(
-                plugin_manager,
-                static_cast<int>((custom_layouts[current_custom_layout].top_screen.right -
-                                  custom_layouts[current_custom_layout].top_screen.left) +
-                                 (custom_layouts[current_custom_layout].bottom_screen.right -
-                                  custom_layouts[current_custom_layout].top_screen.left)),
-                static_cast<int>((custom_layouts[current_custom_layout].top_screen.bottom -
-                                  custom_layouts[current_custom_layout].top_screen.top) +
-                                 (custom_layouts[current_custom_layout].bottom_screen.bottom -
-                                  custom_layouts[current_custom_layout].top_screen.top)));
-        }
         button_pressed = false;
     }
 }
