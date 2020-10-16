@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - uses: ilammy/msvc-dev-cmd@v1
       - name: Build
         shell: bash
