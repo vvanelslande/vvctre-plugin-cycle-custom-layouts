@@ -18,6 +18,11 @@
         "enabled": true,
         "width": 800,
         "height": 480
+      },
+      "move_window": {
+        "enabled": false,
+        "x": 0,
+        "y": 0
       }
     },
     {
@@ -37,6 +42,11 @@
         "enabled": true,
         "width": 1366,
         "height": 768
+      },
+      "move_window": {
+        "enabled": false,
+        "x": 0,
+        "y": 0
       }
     },
     {
@@ -56,6 +66,11 @@
         "enabled": true,
         "width": 1307,
         "height": 784
+      },
+      "move_window": {
+        "enabled": false,
+        "x": 0,
+        "y": 0
       }
     },
     {
@@ -75,6 +90,11 @@
         "enabled": false,
         "width": 0,
         "height": 0
+      },
+      "move_window": {
+        "enabled": false,
+        "x": 0,
+        "y": 0
       }
     }
   ]
