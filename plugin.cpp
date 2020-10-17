@@ -130,50 +130,46 @@ VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager_,
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
     std::ifstream file("cycle-custom-layouts-plugin-settings.json");
     if (!file.fail()) {
-        try {
-            std::ostringstream oss;
-            oss << file.rdbuf();
+        std::ostringstream oss;
+        oss << file.rdbuf();
 
-            const nlohmann::json json = nlohmann::json::parse(oss.str());
+        const nlohmann::json json = nlohmann::json::parse(oss.str());
 
-            button =
-                vvctre_button_device_new(plugin_manager, json["button"].get<std::string>().c_str());
+        button = vvctre_button_device_new(plugin_manager, json["button"].get<std::string>().c_str());
 
-            if (json.count("load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time")) {
-                load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time = json["load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time"].get<bool>();
-            }
+        if (json.count("load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time")) {
+            load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time = json["load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time"].get<bool>();
+        }
 
-            for (const nlohmann::json& json_layout : json["layouts"]) {
-                CustomLayout custom_layout{};
-                custom_layout.top_screen = CustomLayout::Screen{
-                    json_layout["top_screen"]["left"].get<u16>(),
-                    json_layout["top_screen"]["top"].get<u16>(),
-                    json_layout["top_screen"]["right"].get<u16>(),
-                    json_layout["top_screen"]["bottom"].get<u16>(),
+        for (const nlohmann::json& json_layout : json["layouts"]) {
+            CustomLayout custom_layout{};
+            custom_layout.top_screen = CustomLayout::Screen{
+                json_layout["top_screen"]["left"].get<u16>(),
+                json_layout["top_screen"]["top"].get<u16>(),
+                json_layout["top_screen"]["right"].get<u16>(),
+                json_layout["top_screen"]["bottom"].get<u16>(),
+            };
+            custom_layout.bottom_screen = CustomLayout::Screen{
+                json_layout["bottom_screen"]["left"].get<u16>(),
+                json_layout["bottom_screen"]["top"].get<u16>(),
+                json_layout["bottom_screen"]["right"].get<u16>(),
+                json_layout["bottom_screen"]["bottom"].get<u16>(),
+            };
+            if (json_layout.count("resize_window")) {
+                custom_layout.resize_window = CustomLayout::ResizeWindow{
+                    json_layout["resize_window"]["enabled"].get<bool>(),
+                    json_layout["resize_window"]["width"].get<int>(),
+                    json_layout["resize_window"]["height"].get<int>(),
                 };
-                custom_layout.bottom_screen = CustomLayout::Screen{
-                    json_layout["bottom_screen"]["left"].get<u16>(),
-                    json_layout["bottom_screen"]["top"].get<u16>(),
-                    json_layout["bottom_screen"]["right"].get<u16>(),
-                    json_layout["bottom_screen"]["bottom"].get<u16>(),
-                };
-                if (json_layout.count("resize_window")) {
-                    custom_layout.resize_window = CustomLayout::ResizeWindow{
-                        json_layout["resize_window"]["enabled"].get<bool>(),
-                        json_layout["resize_window"]["width"].get<int>(),
-                        json_layout["resize_window"]["height"].get<int>(),
-                    };
-                }
-                if (json_layout.count("move_window")) {
-                    custom_layout.move_window = CustomLayout::MoveWindow{
-                        json_layout["move_window"]["enabled"].get<bool>(),
-                        json_layout["move_window"]["x"].get<int>(),
-                        json_layout["move_window"]["y"].get<int>(),
-                    };
-                }
-                custom_layouts.push_back(custom_layout);
             }
-        } catch (nlohmann::json::exception&) {
+            if (json_layout.count("move_window")) {
+                custom_layout.move_window = CustomLayout::MoveWindow{
+                    json_layout["move_window"]["enabled"].get<bool>(),
+                    json_layout["move_window"]["x"].get<int>(),
+                    json_layout["move_window"]["y"].get<int>(),
+                };
+            }
+            custom_layouts.push_back(custom_layout);
         }
     }
 
