@@ -3,6 +3,7 @@
   "load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time": true,
   "layouts": [
     {
+      "upright": false,
       "top_screen": {
         "left": 0,
         "top": 0,
@@ -27,6 +28,7 @@
       }
     },
     {
+      "upright": false,
       "top_screen": {
         "left": 0,
         "top": 0,
@@ -51,6 +53,7 @@
       }
     },
     {
+      "upright": false,
       "top_screen": {
         "left": 0,
         "top": 0,
@@ -75,6 +78,7 @@
       }
     },
     {
+      "upright": false,
       "top_screen": {
         "left": 0,
         "top": 0,
