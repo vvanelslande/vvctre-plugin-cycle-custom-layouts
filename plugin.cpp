@@ -30,6 +30,7 @@ static const char* required_function_names[] = {
     "vvctre_settings_set_use_custom_layout",
     "vvctre_set_os_window_size",
     "vvctre_set_os_window_position",
+    "vvctre_settings_set_upright_screens",
 };
 
 typedef void (*vvctre_settings_set_custom_layout_top_left_t)(u16 value);
@@ -46,6 +47,7 @@ typedef void (*vvctre_settings_apply_t)();
 typedef void (*vvctre_settings_set_use_custom_layout_t)(bool value);
 typedef void (*vvctre_set_os_window_size_t)(void* plugin_manager, int width, int height);
 typedef void (*vvctre_set_os_window_position_t)(void* plugin_manager, int x, int y);
+typedef void (*vvctre_settings_set_upright_screens_t)(bool value);
 
 static vvctre_settings_set_custom_layout_top_left_t vvctre_settings_set_custom_layout_top_left;
 static vvctre_settings_set_custom_layout_top_top_t vvctre_settings_set_custom_layout_top_top;
@@ -64,6 +66,7 @@ static vvctre_settings_apply_t vvctre_settings_apply;
 static vvctre_settings_set_use_custom_layout_t vvctre_settings_set_use_custom_layout;
 static vvctre_set_os_window_size_t vvctre_set_os_window_size;
 static vvctre_set_os_window_position_t vvctre_set_os_window_position;
+static vvctre_settings_set_upright_screens_t vvctre_settings_set_upright_screens;
 
 static void* plugin_manager;
 static void* button = nullptr;
@@ -72,6 +75,7 @@ static u64 current_custom_layout = -1;
 static bool load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time = true;
 
 struct CustomLayout {
+    bool upright = false;
     struct Screen {
         u16 left = 0;
         u16 top = 0;
@@ -92,7 +96,7 @@ struct CustomLayout {
 std::vector<CustomLayout> custom_layouts;
 
 VVCTRE_PLUGIN_EXPORT int GetRequiredFunctionCount() {
-    return 14;
+    return 15;
 }
 
 VVCTRE_PLUGIN_EXPORT const char** GetRequiredFunctionNames() {
@@ -125,6 +129,8 @@ VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager_,
         (vvctre_settings_set_use_custom_layout_t)required_functions[11];
     vvctre_set_os_window_size = (vvctre_set_os_window_size_t)required_functions[12];
     vvctre_set_os_window_position = (vvctre_set_os_window_position_t)required_functions[13];
+    vvctre_settings_set_upright_screens =
+        (vvctre_settings_set_upright_screens_t)required_functions[14];
 }
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
@@ -169,12 +175,16 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
                     json_layout["move_window"]["y"].get<int>(),
                 };
             }
+            if (json_layout.count("upright")) {
+                custom_layout.upright = json_layout["upright"].get<bool>();
+            }
             custom_layouts.push_back(custom_layout);
         }
     }
 
     if (load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time && !custom_layouts.empty()) {
         vvctre_settings_set_use_custom_layout(true);
+        vvctre_settings_set_upright_screens(custom_layouts[0].upright);
         vvctre_settings_set_custom_layout_top_left(custom_layouts[0].top_screen.left);
         vvctre_settings_set_custom_layout_top_top(custom_layouts[0].top_screen.top);
         vvctre_settings_set_custom_layout_top_right(custom_layouts[0].top_screen.right);
@@ -198,6 +208,16 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 
 VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
     if (load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time && !custom_layouts.empty()) {
+        vvctre_settings_set_use_custom_layout(true);
+        vvctre_settings_set_upright_screens(custom_layouts[0].upright);
+        vvctre_settings_set_custom_layout_top_left(custom_layouts[0].top_screen.left);
+        vvctre_settings_set_custom_layout_top_top(custom_layouts[0].top_screen.top);
+        vvctre_settings_set_custom_layout_top_right(custom_layouts[0].top_screen.right);
+        vvctre_settings_set_custom_layout_top_bottom(custom_layouts[0].top_screen.bottom);
+        vvctre_settings_set_custom_layout_bottom_left(custom_layouts[0].bottom_screen.left);
+        vvctre_settings_set_custom_layout_bottom_top(custom_layouts[0].bottom_screen.top);
+        vvctre_settings_set_custom_layout_bottom_right(custom_layouts[0].bottom_screen.right);
+        vvctre_settings_set_custom_layout_bottom_bottom(custom_layouts[0].bottom_screen.bottom);
         if (custom_layouts[0].resize_window.enabled) {
             vvctre_set_os_window_size(plugin_manager, custom_layouts[0].resize_window.width,
                                       custom_layouts[0].resize_window.height);
@@ -222,6 +242,8 @@ VVCTRE_PLUGIN_EXPORT void BeforeDrawingFPS() {
                                     ? 0
                                     : (current_custom_layout + 1);
         vvctre_settings_set_use_custom_layout(true);
+        vvctre_settings_set_upright_screens(
+            custom_layouts[current_custom_layout].upright);
         vvctre_settings_set_custom_layout_top_left(
             custom_layouts[current_custom_layout].top_screen.left);
         vvctre_settings_set_custom_layout_top_top(
