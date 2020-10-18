@@ -6,8 +6,12 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+
+#include <nlohmann/json.hpp>
+#include <whereami.h>
+
 #include "common_types.h"
-#include "json/single_include/nlohmann/json.hpp"
+#include "string_util.h"
 
 #ifdef _WIN32
 #define VVCTRE_PLUGIN_EXPORT extern "C" __declspec(dllexport)
@@ -134,7 +138,19 @@ VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager_,
 }
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
-    std::ifstream file("cycle-custom-layouts-plugin-settings.json");
+    int length = wai_getExecutablePath(nullptr, 0, nullptr);
+    std::string vvctre_folder(length, '\0');
+    int dirname_length = 0;
+    wai_getExecutablePath(&vvctre_folder[0], length, &dirname_length);
+    vvctre_folder = vvctre_folder.substr(0, dirname_length);
+
+    std::ifstream file;
+#ifdef _MSC_VER
+    file.open(Common::UTF8ToUTF16W(vvctre_folder + "\\cycle-custom-layouts-plugin-settings.json"));
+#else
+    file.open(vvctre_folder + "/cycle-custom-layouts-plugin-settings.json");
+#endif
+
     if (!file.fail()) {
         std::ostringstream oss;
         oss << file.rdbuf();
