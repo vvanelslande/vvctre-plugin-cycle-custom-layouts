@@ -2,3 +2,6 @@
 path = json
 url = https://github.com/nlohmann/json.git
 branch = develop
+[submodule "whereami"]
+	path = whereami
+	url = https://github.com/gpakosz/whereami.git
