@@ -20,15 +20,16 @@ jobs:
         with:
           submodules: recursive
       - uses: ilammy/msvc-dev-cmd@v1
-      - name: Build
+      - name: Configure CMake
         shell: bash
         run: |
           cd $GITHUB_WORKSPACE
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            cl.exe //LD //Fe:cycle-custom-layouts.dll plugin.cpp
-          else
-            g++ plugin.cpp -shared -o cycle-custom-layouts.so -fPIC
-          fi
+          mkdir build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        working-directory: ./build
+        shell: bash
+        run: cmake --build . --config Release
       - name: Prepare to upload
         if: github.event_name == 'push'
         shell: bash
@@ -37,8 +38,10 @@ jobs:
           export VERSION=${GITHUB_REF:10}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           if [ "$RUNNER_OS" == "Windows" ]; then
+            mv ./build/bin/Release/cycle-custom-layouts.dll .
             7z a vvctre-plugin-cycle-custom-layouts-$VERSION-${{runner.os}}.7z cycle-custom-layouts.dll license.txt cycle-custom-layouts-plugin-settings.json
           else
+            mv ./build/bin/Release/cycle-custom-layouts.so .
             7z a vvctre-plugin-cycle-custom-layouts-$VERSION-${{runner.os}}.7z cycle-custom-layouts.so license.txt cycle-custom-layouts-plugin-settings.json
           fi
       - name: Upload to GitHub Releases
