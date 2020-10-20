@@ -153,7 +153,7 @@ VVCTRE_PLUGIN_EXPORT void PluginLoaded(void* core, void* plugin_manager_,
         (vvctre_gui_end_menu_t)required_functions[16];
     vvctre_gui_menu_item =
         (vvctre_gui_menu_item_t)required_functions[17];
-    vvctre_button_device_delete = (vvctre_button_device_delete_t_t)required_functions[18];
+    vvctre_button_device_delete = (vvctre_button_device_delete_t)required_functions[18];
 }
 
 VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
