@@ -282,8 +282,9 @@ VVCTRE_PLUGIN_EXPORT void BeforeDrawingFPS() {
                                     ? 0
                                     : (current_custom_layout + 1);
         vvctre_settings_set_use_custom_layout(true);
-        vvctre_settings_set_upright_screens(
-            custom_layouts[current_custom_layout].upright);
+        if (custom_layouts[current_custom_layout].upright) {
+            vvctre_settings_set_upright_screens(*custom_layouts[current_custom_layout].upright);
+        }
         vvctre_settings_set_custom_layout_top_left(
             custom_layouts[current_custom_layout].top_screen.left);
         vvctre_settings_set_custom_layout_top_top(
