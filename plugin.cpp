@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <optional>
 
 #include <nlohmann/json.hpp>
 #include <whereami.h>
@@ -91,7 +92,7 @@ static u64 current_custom_layout = -1;
 static bool load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time = true;
 
 struct CustomLayout {
-    bool upright = false;
+    std::optional<bool> upright;
     struct Screen {
         u16 left = 0;
         u16 top = 0;
@@ -219,7 +220,9 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 
     if (load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time && !custom_layouts.empty()) {
         vvctre_settings_set_use_custom_layout(true);
-        vvctre_settings_set_upright_screens(custom_layouts[0].upright);
+        if (custom_layouts[0].upright) {
+            vvctre_settings_set_upright_screens(*custom_layouts[0].upright);
+        }
         vvctre_settings_set_custom_layout_top_left(custom_layouts[0].top_screen.left);
         vvctre_settings_set_custom_layout_top_top(custom_layouts[0].top_screen.top);
         vvctre_settings_set_custom_layout_top_right(custom_layouts[0].top_screen.right);
@@ -244,7 +247,9 @@ VVCTRE_PLUGIN_EXPORT void InitialSettingsOpening() {
 VVCTRE_PLUGIN_EXPORT void EmulationStarting() {
     if (load_first_layout_when_vvctre_is_starting_and_emulation_is_starting_for_the_first_time && !custom_layouts.empty()) {
         vvctre_settings_set_use_custom_layout(true);
-        vvctre_settings_set_upright_screens(custom_layouts[0].upright);
+        if (custom_layouts[0].upright) {
+            vvctre_settings_set_upright_screens(*custom_layouts[0].upright);
+        }
         vvctre_settings_set_custom_layout_top_left(custom_layouts[0].top_screen.left);
         vvctre_settings_set_custom_layout_top_top(custom_layouts[0].top_screen.top);
         vvctre_settings_set_custom_layout_top_right(custom_layouts[0].top_screen.right);
