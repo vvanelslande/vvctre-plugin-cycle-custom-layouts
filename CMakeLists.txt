@@ -24,4 +24,4 @@ add_subdirectory(json EXCLUDE_FROM_ALL)
 add_library(vvctre-plugin-cycle-custom-layouts SHARED plugin.cpp string_util.cpp string_util.h)
 target_link_libraries(vvctre-plugin-cycle-custom-layouts PRIVATE whereami nlohmann_json)
 
-set_target_properties(vvctre-plugin-cycle-custom-layouts PROPERTIES PREFIX "" OUTPUT_NAME "cycle-custom-layouts")
+set_target_properties(vvctre-plugin-cycle-custom-layouts PROPERTIES PREFIX "" OUTPUT_NAME cycle-custom-layouts)
